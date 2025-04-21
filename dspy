@@ -1,0 +1,29 @@
+DSPY
+
+    More Modular and Customizable (Dspy advantage)
+
+    Dspy is designed as a framework for building and optimizing LLM chains.
+
+    You can plug in different LLMs (OpenAI, Claude, local models), retrievers, tools, and evaluators.
+
+    It’s more flexible if you want to fine-tune how an agent reasons, what tools it uses, and how it handles errors or retries.
+
+    Dspy offers integrated evals, which let you test and refine chains with examples and targets.
+
+    You can “train” your LLM agent to improve over time with feedback and benchmarks.
+
+    This is powerful if you want to iteratively improve SQL generation or natural language answers.
+
+    Model & Backend Agnostic
+
+    Dspy is LLM-agnostic: you can use OpenAI, Anthropic, local models, etc.
+
+    Use Dspy if you're experimenting with different model providers or want to go fully self-hosted later.
+    
+    Tool Chaining and Reasoning Transparency (Dspy advantage)
+
+    Dspy makes each step in the reasoning chain visible and testable.
+
+    If you want to combine SQL with RAG, file access, or agent memory — Dspy gives you that flexibility natively.
+
+    Helpful for: More advanced agents that do SQL and more, like plotting, summarizing, multi-step logic.
