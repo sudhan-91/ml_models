@@ -1,0 +1,29 @@
+pip install pywin32
+
+import win32security
+import ntsecuritycon as con
+import os
+
+def get_folder_owner(path):
+    sd = win32security.GetFileSecurity(path, win32security.OWNER_SECURITY_INFORMATION)
+    owner_sid = sd.GetSecurityDescriptorOwner()
+    name, domain, _ = win32security.LookupAccountSid(None, owner_sid)
+    return f"{domain}\\{name}"
+
+folder_path = r"C:\path\to\folder"
+print("Owner:", get_folder_owner(folder_path))
+
+
+import subprocess
+
+def get_owner(path):
+    cmd = ['icacls', path]
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
+    for line in result.stdout.splitlines():
+        if line.strip().startswith(path):
+            continue
+        if "(OI)(CI)(F)" in line or ":(F)" in line:
+            return line.split(':')[0].strip()
+    return "Unknown"
+
+print(get_owner(r"C:\path\to\folder"))
