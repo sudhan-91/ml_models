@@ -27,3 +27,25 @@ def get_owner(path):
     return "Unknown"
 
 print(get_owner(r"C:\path\to\folder"))
+
+
+import os
+import configparser
+
+def is_internet_shortcut(file_path):
+    if not file_path.lower().endswith(".url"):
+        return False
+
+    config = configparser.ConfigParser()
+    try:
+        config.read(file_path)
+        return 'InternetShortcut' in config and 'URL' in config['InternetShortcut']
+    except Exception as e:
+        return False
+
+# Example usage
+file_path = r"C:\Users\YourName\Desktop\example.url"
+if is_internet_shortcut(file_path):
+    print(f"{file_path} is an Internet Shortcut.")
+else:
+    print(f"{file_path} is NOT an Internet Shortcut.")
