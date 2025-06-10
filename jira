@@ -1,0 +1,34 @@
+Program Context
+
+The Quality Management (QM) team currently faces challenges in efficiently disseminating information, handling frequent queries on procedures, and capturing quality incidents from frontline teams. Manual processes lead to delays, inconsistent information delivery, and limited tracking of user interactions. To address these gaps, there's a growing need for a conversational interface that streamlines knowledge access and supports real-time quality interactions across the organization.
+🎯 Program Objective
+
+To design, develop, and deploy an AI-powered QM Chatbot that enables employees to:
+
+    Instantly retrieve SOPs, quality policies, and compliance checklists
+
+    Report quality incidents or non-conformances interactively
+
+    Perform self-assessments or pre-audit checks via guided conversations
+
+    Escalate unresolved or complex issues to the quality team
+
+The chatbot will integrate with internal systems (e.g., SharePoint, ticketing tools) and be accessible via web, mobile, and internal messaging platforms like Microsoft Teams.
+
+Program Benefits
+Benefit Type	Description
+Operational Efficiency	Reduces manual intervention and email-based queries by automating common QM interactions.
+Employee Enablement	Empowers employees with 24/7 access to critical QM documentation and processes.
+Improved Compliance	Ensures accurate, consistent communication of policies and audit procedures.
+Faster Issue Reporting	Enables real-time capture of non-conformance reports and near misses.
+Data & Insights	Tracks interaction logs and user behavior to improve QM content and identify knowledge gaps.
+
+Program Effort
+Workstream	Estimated Effort
+Requirements & Use Case Definition	2 weeks
+Chatbot Design & Conversation Flow Mapping	3 weeks
+Development (Web + Teams Integration)	6–8 weeks
+Back-end Integrations (Docs, Ticketing, DB)	4 weeks
+Testing (UAT + Security Reviews)	2 weeks
+Training & Go-Live Support	1–2 weeks
+Total Estimated Effort	~3–4 months (depending on team size & scope)
