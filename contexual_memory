@@ -1,0 +1,35 @@
+from agno.utils import Message
+from datetime import datetime
+
+def update_memory_with_context(agent, new_user_message: str):
+    history = agent.memory.get_history()
+
+    # Step 1: Find previous user message
+    previous_user_msg = None
+    for msg in reversed(history):
+        if msg.role == "user":
+            previous_user_msg = msg
+            break
+
+    if not previous_user_msg:
+        agent.memory.add(new_user_message)
+        return
+
+    # Step 2: Ask the model if the messages are related
+    reasoning_prompt = f"""
+You are helping maintain contextual memory. Determine if the current user message is related to the previous one.
+Previous message: "{previous_user_msg.content}"
+Current message: "{new_user_message}"
+If they are related, merge them into a single unified context or question. If not, just return the current message.
+Respond with just the merged question or statement.
+"""
+    merged_result = agent.model.complete(reasoning_prompt).strip()
+
+    # Step 3: Save merged result in memory
+    agent.memory.add(merged_result)
+
+
+user_input = "How might that affect Microsoft’s stock?"
+update_memory_with_context(controller_agent, user_input)
+controller_agent.print_response(user_input, stream=True)
+
