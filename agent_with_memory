@@ -1,0 +1,49 @@
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.memory import Memory  # NEW: Memory import
+from agno.tools.duckduckgo import DuckDuckGoTools
+from agno.tools.yfinance import YFinanceTools
+
+# Step 1: Define memory
+controller_memory = Memory(name="controller_memory")
+
+# Step 2: Sub-agents
+search_agent = Agent(
+    name="Searcher",
+    role="Web search expert",
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[DuckDuckGoTools()],
+    instructions="Search the internet for the latest information.",
+    show_tool_calls=True
+)
+
+stocks_agent = Agent(
+    name="Stock Analyst",
+    role="Stock market expert",
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[YFinanceTools()],
+    instructions="Provide accurate stock data and summarize trends.",
+    show_tool_calls=True
+)
+
+# Step 3: Controller agent with memory
+controller_agent = Agent(
+    name="Reasoning Coordinator",
+    role="Analyze queries, delegate tasks, and remember context.",
+    model=OpenAIChat(id="gpt-4o"),
+    memory=controller_memory,  # 👈 Memory added
+    team=[search_agent, stocks_agent],
+    instructions=[
+        "Step 1: Understand the query.",
+        "Step 2: Decide whether to use Searcher, Stock Analyst, or both.",
+        "Step 3: Combine the answers and cite sources.",
+        "Step 4: Remember important facts about companies, users' interests, or past queries."
+    ],
+    show_tool_calls=True
+)
+
+# Step 4: Try it out
+controller_agent.print_response("What's the latest update on OpenAI's partnership with Microsoft?", stream=True)
+
+# Follow-up (context-aware)
+controller_agent.print_response("How might that affect Microsoft's stock?", stream=True)
