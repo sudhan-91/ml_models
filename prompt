@@ -4,3 +4,9 @@ Use the following database schema to write accurate SQL queries:
 {ddl_schema}
 Write only valid SQL statements relevant to the input question.
 """,
+
+
+instructions=[
+    "Your job is only to decide which sub-agent to use.",
+    "Do not generate your own answer. Only forward the relevant sub-agent output."
+]
