@@ -1,0 +1,34 @@
+class SmartSQLTool(SQLDatabaseTools):
+    def call(self, tool_call: ToolCall):
+        sql = tool_call.args.get("query", "")
+        result = super().call(tool_call)
+
+        memory_note = {
+            "user_query": tool_call.original_input,
+            "sql": sql,
+        }
+
+        if "rows" in result:
+            df = pd.DataFrame(result["rows"])
+            row_count = len(df)
+
+            memory_note["row_count"] = row_count
+
+            if row_count <= 50:
+                memory_note["summary"] = self.summarize_dataframe(df)
+            else:
+                memory_note["summary"] = f"{row_count} rows returned. User needs to filter."
+
+        # ✅ Save to memory
+        tool_call.agent.memory.add_note(f"SQL Memory:\n{memory_note}")
+        return result
+
+
+
+
+sql_agent.print_response("Show me orders from 2023")  
+# → Returns results + memory saved
+
+sql_agent.print_response("Now filter that by customers from Europe")  
+# → Uses memory to modify the SQL and rerun
+
