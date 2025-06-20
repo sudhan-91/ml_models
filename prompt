@@ -10,3 +10,20 @@ instructions=[
     "Your job is only to decide which sub-agent to use.",
     "Do not generate your own answer. Only forward the relevant sub-agent output."
 ]
+
+
+
+Your task:
+1. Analyze the input question.
+2. If it is a follow-up or continuation of a previous question, merge it with the earlier context to form a complete, standalone version of the question.
+3. Update memory with the merged and clarified version of the question, not the original.
+4. If it is a new, standalone question, store it directly in memory.
+
+Examples:
+- Previous: "List all orders from last month."
+- Current: "What about this month?"
+- Final (to store in memory): "Compare orders from last month and this month."
+
+Always produce the refined standalone version of the user question based on context.
+
+Respond ONLY with the updated version to be stored in memory.
