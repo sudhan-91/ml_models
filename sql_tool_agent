@@ -1,0 +1,70 @@
+from agno.tools.sql import SQLDatabaseTools
+from agno.types import ToolCall
+import pandas as pd
+
+class SmartSQLTool(SQLDatabaseTools):
+    def call(self, tool_call: ToolCall):
+        sql = tool_call.args.get("query", "")
+
+        # Run base query
+        result = super().call(tool_call)
+
+        if "rows" in result:
+            df = pd.DataFrame(result["rows"])
+
+            # Count rows
+            row_count = len(df)
+
+            if row_count > 50:
+                return {
+                    "warning": f"The query returned {row_count} rows. Please apply filters like date, region, or customer.",
+                    "row_count": row_count,
+                    "suggestion": "Try narrowing it down with a filter."
+                }
+
+            # Summarize small results
+            summary = self.summarize_dataframe(df)
+            return {
+                "summary": summary,
+                "row_count": row_count,
+                "rows": result["rows"]
+            }
+
+        return result
+
+    def summarize_dataframe(self, df: pd.DataFrame) -> str:
+        # Basic summary logic – customize for your schema
+        summary_parts = []
+        for col in df.columns:
+            if pd.api.types.is_numeric_dtype(df[col]):
+                summary_parts.append(f"{col}: avg={df[col].mean():.2f}, max={df[col].max()}, min={df[col].min()}")
+            else:
+                top_vals = df[col].value_counts().head(3).to_dict()
+                summary_parts.append(f"{col}: top values = {top_vals}")
+        return "\n".join(summary_parts)
+
+
+
+
+
+
+
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+
+sql_agent = Agent(
+    name="Smart SQL Assistant",
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[SmartSQLTool(url="sqlite:///your.db", include_tables=["orders", "customers"])],
+    instructions=[
+        "When given a user question, generate SQL.",
+        "Run it, check how many records come back.",
+        "If there are more than 50 rows, ask the user to apply filters.",
+        "If it's fewer than 50, summarize the data clearly.",
+        "Never show raw SQL output unless asked."
+    ],
+    show_tool_calls=True
+)
+
+# Example call
+sql_agent.print_response("Show me all orders from last year", stream=True)
