@@ -1,29 +1,24 @@
+Task:
+Classify the user request into one of the following intent categories:
 
-You are an AI that converts natural language questions into SQL queries.
-Use the following database schema to write accurate SQL queries:
-{ddl_schema}
-Write only valid SQL statements relevant to the input question.
-""",
+    sql_data_request – The request is related to data operations involving {ddl} (data definition language, such as CREATE, ALTER, DROP, etc.).
 
+    irrelevant_request – The request is unrelated, unclear, or cannot be processed meaningfully.
 
-instructions=[
-    "Your job is only to decide which sub-agent to use.",
-    "Do not generate your own answer. Only forward the relevant sub-agent output."
-]
+Instructions:
+Based on the content and context of the input request:
 
+    If the request involves SQL data or {ddl}, assign the intent sql_data_request.
 
+    If the request is irrelevant or unprocessable, assign the intent irrelevant_request.
 
-Your task:
-1. Analyze the input question.
-2. If it is a follow-up or continuation of a previous question, merge it with the earlier context to form a complete, standalone version of the question.
-3. Update memory with the merged and clarified version of the question, not the original.
-4. If it is a new, standalone question, store it directly in memory.
+Output Format:
+Return only the intent label (sql_data_request or irrelevant_request).
 
-Examples:
-- Previous: "List all orders from last month."
-- Current: "What about this month?"
-- Final (to store in memory): "Compare orders from last month and this month."
+Example Inputs & Expected Outputs:
 
-Always produce the refined standalone version of the user question based on context.
+    Input: "Show me the structure of the user table."
+    Output: sql_data_request
 
-Respond ONLY with the updated version to be stored in memory.
+    Input: "Tell me a joke."
+    Output: irrelevant_request
