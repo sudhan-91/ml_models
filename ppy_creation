@@ -1,0 +1,29 @@
+from pptx import Presentation
+import copy
+
+def merge_presentations(pptx_files, output_file):
+    if not pptx_files:
+        raise ValueError("No PowerPoint files provided.")
+
+    # Load the first presentation
+    merged_prs = Presentation(pptx_files[0])
+
+    for pptx_file in pptx_files[1:]:
+        src_prs = Presentation(pptx_file)
+        for slide in src_prs.slides:
+            # Use the blank layout (layout index 6)
+            blank_slide_layout = merged_prs.slide_layouts[6]
+            new_slide = merged_prs.slides.add_slide(blank_slide_layout)
+
+            for shape in slide.shapes:
+                # Copy shapes using their XML
+                el = shape.element
+                new_el = copy.deepcopy(el)
+                new_slide.shapes._spTree.insert_element_before(new_el, 'p:extLst')
+
+    merged_prs.save(output_file)
+    print(f"Merged presentation saved as: {output_file}")
+
+# Example usage
+pptx_files = ['file1.pptx', 'file2.pptx', 'file3.pptx']
+merge_presentations(pptx_files, 'merged_output.pptx')
