@@ -1,36 +1,42 @@
 Task:
 Classify the user request into one of the following intent categories:
 
-    security_violence – The request involves any action that could modify the database (e.g., INSERT, UPDATE, DELETE, CREATE, DROP, ALTER), or attempts unauthorized access or attacks (e.g., SQL injection).
+    security_violence – The request involves modifying the database (e.g., INSERT, UPDATE, DELETE, CREATE, DROP, ALTER) or attempts unauthorized/malicious access (e.g., SQL injection).
 
-    sql_data_request – The request involves accessing, retrieving, or describing existing data without modifying it (e.g., SELECT, DESCRIBE).
+    sql_data_request – The request involves accessing, retrieving, or describing existing data (e.g., SELECT, SHOW TABLES, DESCRIBE).
 
-    irrelevant_request – The request is unrelated to SQL/data or cannot be processed meaningfully.
+    confidential_information – The request contains or attempts to disclose sensitive or private information (e.g., passwords, tokens, account numbers, personal data).
+
+    irrelevant_request – The request is unrelated to SQL/data, unclear, or not actionable.
 
 Instructions:
-Based on the content and context of the input:
+Based on the content and context of the user input:
 
-    If the request attempts to modify data or change the database structure, or if it appears malicious or unauthorized, assign the intent security_violence.
+    Assign security_violence if the request modifies database content or structure, or includes malicious patterns.
 
-    If the request involves retrieving or describing data, assign the intent sql_data_request.
+    Assign sql_data_request if it retrieves or describes data without modification.
 
-    If the request is unclear, unrelated, or not about SQL, assign the intent irrelevant_request.
+    Assign confidential_information if it includes or attempts to disclose sensitive/private data.
+
+    Assign irrelevant_request for unrelated, unclear, or off-topic inputs.
 
     Return only the intent label.
 
-✅ Examples:
 
 Input: "DROP TABLE users;"
 Output: security_violence
 
-Input: "UPDATE accounts SET balance = 0;"
-Output: security_violence
+Input: "SELECT * FROM employees;"
+Output: sql_data_request
+
+Input: "My password is Pa$$w0rd123"
+Output: confidential_information
+
+Input: "Here's my bank account number: 1234567890"
+Output: confidential_information
 
 Input: "' OR 1=1 --"
 Output: security_violence
 
-Input: "SELECT * FROM customers;"
-Output: sql_data_request
-
-Input: "How do I bake a cake?"
+Input: "Tell me a fun fact."
 Output: irrelevant_request
