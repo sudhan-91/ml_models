@@ -1,24 +1,36 @@
 Task:
 Classify the user request into one of the following intent categories:
 
-    sql_data_request – The request is related to data operations involving {ddl} (data definition language, such as CREATE, ALTER, DROP, etc.).
+    security_violence – The request involves any action that could modify the database (e.g., INSERT, UPDATE, DELETE, CREATE, DROP, ALTER), or attempts unauthorized access or attacks (e.g., SQL injection).
 
-    irrelevant_request – The request is unrelated, unclear, or cannot be processed meaningfully.
+    sql_data_request – The request involves accessing, retrieving, or describing existing data without modifying it (e.g., SELECT, DESCRIBE).
+
+    irrelevant_request – The request is unrelated to SQL/data or cannot be processed meaningfully.
 
 Instructions:
-Based on the content and context of the input request:
+Based on the content and context of the input:
 
-    If the request involves SQL data or {ddl}, assign the intent sql_data_request.
+    If the request attempts to modify data or change the database structure, or if it appears malicious or unauthorized, assign the intent security_violence.
 
-    If the request is irrelevant or unprocessable, assign the intent irrelevant_request.
+    If the request involves retrieving or describing data, assign the intent sql_data_request.
 
-Output Format:
-Return only the intent label (sql_data_request or irrelevant_request).
+    If the request is unclear, unrelated, or not about SQL, assign the intent irrelevant_request.
 
-Example Inputs & Expected Outputs:
+    Return only the intent label.
 
-    Input: "Show me the structure of the user table."
-    Output: sql_data_request
+✅ Examples:
 
-    Input: "Tell me a joke."
-    Output: irrelevant_request
+Input: "DROP TABLE users;"
+Output: security_violence
+
+Input: "UPDATE accounts SET balance = 0;"
+Output: security_violence
+
+Input: "' OR 1=1 --"
+Output: security_violence
+
+Input: "SELECT * FROM customers;"
+Output: sql_data_request
+
+Input: "How do I bake a cake?"
+Output: irrelevant_request
