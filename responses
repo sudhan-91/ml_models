@@ -1,0 +1,54 @@
+irrelevant_responses = [
+    "Thank you for your input. However, this request doesn't align with the current scope related to FAR or failure case analysis.",
+    "We appreciate your message. Unfortunately, it falls outside the context of our ongoing FAR failure case evaluation.",
+    "This request appears to be unrelated to the FAR failure case use case. Please clarify if it's connected.",
+    "To keep our focus on FAR-related failures, we kindly ask for relevant input. This doesn't seem to fit.",
+    "Your request has been noted, but it is currently outside the parameters of FAR and failure case analysis.",
+    "At this time, we are prioritizing items directly related to FAR failures. This request doesn't appear applicable.",
+    "This issue seems unrelated to our analysis of FAR failure scenarios. Please provide more context if otherwise.",
+    "Thank you, but we are only accepting inputs directly tied to FAR failure investigations at the moment.",
+    "To maintain relevance, we request that submissions focus strictly on FAR-related failures. This one may be outside that scope.",
+    "We’re currently focused on failure cases impacting FAR metrics. This request seems to fall outside that category.",
+    "This request does not appear to relate to our current investigation into FAR failure patterns.",
+    "Kindly align your request with the scope of FAR and related failure modes for effective triage.",
+    "Your input is appreciated, though this request seems disconnected from the FAR failure use case.",
+    "This item does not align with our active analysis regarding FAR or its failure triggers.",
+    "We are currently filtering for FAR-specific failure scenarios. This request doesn't match those criteria."
+]
+
+
+security_violation_bot_responses = [
+    "That action isn't allowed. Security protocols triggered.",
+    "This request violates our security policy. It's been flagged.",
+    "Access denied. This behavior is not permitted.",
+    "Security alert: Your action triggered a violation.",
+    "That’s against the rules. Logging this for review.",
+    "We can’t process that. It goes against our system’s security.",
+    "Warning: This request was flagged as suspicious.",
+    "This attempt looks like a FAR exploit. It's blocked.",
+    "Unauthorized action detected. Monitoring activated.",
+    "This request isn't safe. We're stopping it here.",
+    "Hold on — that violates access policies.",
+    "That looks like a bypass attempt. It won’t work.",
+    "Violation detected. We've logged the details.",
+    "Your input triggered a security block. Please stop.",
+    "Not allowed. This action breaks our trust policy."
+]
+
+confidential_info_bot_responses = [
+    "Sorry, I can’t share that. It’s confidential.",
+    "That information is restricted for security reasons.",
+    "I’m not allowed to provide that kind of data.",
+    "Nice try, but that’s confidential!",
+    "Can’t help with that — it’s sensitive info.",
+    "That data is protected and not available here.",
+    "For security reasons, I can’t show that.",
+    "Access to that information isn’t permitted.",
+    "That’s beyond my access level. Stay safe!",
+    "Oops — that’s classified. Let’s keep things secure.",
+    "I’m not cleared to handle that request.",
+    "That request crosses a confidentiality boundary.",
+    "Let’s avoid sharing sensitive details here.",
+    "Not allowed to disclose that. Thanks for understanding.",
+    "That info is private. I can't provide it."
+]
