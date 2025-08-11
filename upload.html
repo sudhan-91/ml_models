@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>File Upload</title>
+  <title>Upload File and Prompt</title>
   <style>
     body {
       margin: 0;
@@ -13,7 +13,6 @@
       height: 100vh;
     }
 
-    /* Left: Upload Form */
     .upload-section {
       flex: 1;
       padding: 40px;
@@ -25,12 +24,18 @@
       margin-bottom: 20px;
     }
 
-    input[type="file"] {
+    input[type="file"], textarea {
       margin-bottom: 20px;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
       width: 100%;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
     }
 
     button {
@@ -43,11 +48,6 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #0e8f72;
-    }
-
-    /* Right: Response Display */
     .response-section {
       flex: 2;
       padding: 40px;
@@ -78,16 +78,18 @@
 <body>
 
   <div class="upload-section">
-    <h2>Upload a CSV File</h2>
+    <h2>Upload CSV and Prompt</h2>
     <form id="uploadForm">
       <input type="file" id="fileInput" name="file" accept=".csv" required />
       <br>
-      <button type="submit">Upload</button>
+      <textarea id="promptInput" placeholder="Enter your prompt here..." required></textarea>
+      <br>
+      <button type="submit">Submit</button>
     </form>
   </div>
 
   <div class="response-section" id="response">
-    <h2>Data Preview</h2>
+    <h2>Response</h2>
     <div id="tableContainer">No data yet.</div>
   </div>
 
@@ -96,29 +98,31 @@
       event.preventDefault();
 
       const fileInput = document.getElementById("fileInput");
+      const promptInput = document.getElementById("promptInput");
       const file = fileInput.files[0];
+      const prompt = promptInput.value.trim();
 
-      if (!file) {
-        alert("Please select a file.");
+      if (!file || !prompt) {
+        alert("Please provide both a file and a prompt.");
         return;
       }
 
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("prompt", prompt);
 
       try {
-        const response = await fetch("http://localhost:5000/upload", {
+        const response = await fetch("http://localhost:8000/process", {
           method: "POST",
           body: formData
         });
 
         const result = await response.json();
 
-        // If response contains 'data' (assumed to be a list of dicts), render it as a table
         if (result.data && Array.isArray(result.data)) {
           renderTable(result.data);
         } else {
-          document.getElementById("tableContainer").innerHTML = '<p class="error">Unexpected response format</p>';
+          document.getElementById("tableContainer").innerHTML = `<p>${result.message || 'No structured data returned.'}</p>`;
         }
       } catch (error) {
         document.getElementById("tableContainer").innerHTML = `<p class="error">Error: ${error.message}</p>`;
@@ -133,7 +137,6 @@
 
       const table = document.createElement("table");
 
-      // Create header
       const thead = table.createTHead();
       const headerRow = thead.insertRow();
       Object.keys(data[0]).forEach(key => {
@@ -142,7 +145,6 @@
         headerRow.appendChild(th);
       });
 
-      // Create rows
       const tbody = table.createTBody();
       data.forEach(row => {
         const tr = tbody.insertRow();
@@ -160,4 +162,3 @@
 
 </body>
 </html>
-
