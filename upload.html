@@ -24,18 +24,13 @@
       margin-bottom: 20px;
     }
 
-    input[type="file"], textarea {
+    input[type="file"], select {
       margin-bottom: 20px;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
       width: 100%;
       box-sizing: border-box;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 80px;
     }
 
     button {
@@ -54,22 +49,6 @@
       overflow-y: auto;
     }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f2f2f2;
-    }
-
     .error {
       color: red;
     }
@@ -77,88 +56,67 @@
 </head>
 <body>
 
-  <div class="upload-section">
-    <h2>Upload CSV and Prompt</h2>
-    <form id="uploadForm">
-      <input type="file" id="fileInput" name="file" accept=".csv" required />
-      <br>
-      <textarea id="promptInput" placeholder="Enter your prompt here..." required></textarea>
-      <br>
-      <button type="submit">Submit</button>
-    </form>
-  </div>
+<div class="upload-section">
+  <h2>Upload CSV and Prompt</h2>
+  <form id="uploadForm">
+    <input type="file" id="fileInput" name="file" accept=".csv" required />
+    <br>
+    <select id="promptInput" required>
+      <option value="" disabled selected>Select a prompt...</option>
+      <option value="Summary">Summary</option>
+      <option value="Analysis">Analysis</option>
+      <option value="Insights">Insights</option>
+    </select>
+    <br>
+    <button type="submit">Submit</button>
+  </form>
+</div>
 
-  <div class="response-section" id="response">
-    <h2>Response</h2>
-    <div id="tableContainer">No data yet.</div>
-  </div>
+<div class="response-section" id="response">
+  <h2>Response</h2>
+  <div id="tableContainer">The processed CSV will be downloaded automatically.</div>
+</div>
 
-  <script>
-    document.getElementById("uploadForm").addEventListener("submit", async function(event) {
-      event.preventDefault();
+<script>
+  document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
 
-      const fileInput = document.getElementById("fileInput");
-      const promptInput = document.getElementById("promptInput");
-      const file = fileInput.files[0];
-      const prompt = promptInput.value.trim();
+    const fileInput = document.getElementById("fileInput");
+    const promptInput = document.getElementById("promptInput");
+    const file = fileInput.files[0];
+    const prompt = promptInput.value.trim();
 
-      if (!file || !prompt) {
-        alert("Please provide both a file and a prompt.");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("prompt", prompt);
-
-      try {
-        const response = await fetch("http://localhost:8000/process", {
-          method: "POST",
-          body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.data && Array.isArray(result.data)) {
-          renderTable(result.data);
-        } else {
-          document.getElementById("tableContainer").innerHTML = `<p>${result.message || 'No structured data returned.'}</p>`;
-        }
-      } catch (error) {
-        document.getElementById("tableContainer").innerHTML = `<p class="error">Error: ${error.message}</p>`;
-      }
-    });
-
-    function renderTable(data) {
-      if (data.length === 0) {
-        document.getElementById("tableContainer").innerHTML = "<p>No data available.</p>";
-        return;
-      }
-
-      const table = document.createElement("table");
-
-      const thead = table.createTHead();
-      const headerRow = thead.insertRow();
-      Object.keys(data[0]).forEach(key => {
-        const th = document.createElement("th");
-        th.textContent = key;
-        headerRow.appendChild(th);
-      });
-
-      const tbody = table.createTBody();
-      data.forEach(row => {
-        const tr = tbody.insertRow();
-        Object.values(row).forEach(value => {
-          const td = tr.insertCell();
-          td.textContent = value;
-        });
-      });
-
-      const container = document.getElementById("tableContainer");
-      container.innerHTML = "";
-      container.appendChild(table);
+    if (!file || !prompt) {
+      alert("Please provide both a file and a prompt.");
+      return;
     }
-  </script>
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("prompt", prompt);
+
+    try {
+      const response = await fetch("http://localhost:8000/process", {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch processed CSV.");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "result.csv";
+      a.click();
+      window.URL.revokeObjectURL(url); // Clean up
+    } catch (error) {
+      document.getElementById("tableContainer").innerHTML = `<p class="error">Error: ${error.message}</p>`;
+    }
+  });
+</script>
 
 </body>
 </html>
