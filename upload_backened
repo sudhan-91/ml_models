@@ -1,40 +1,75 @@
-from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import pandas as pd
+import os
 import io
+import uuid
+import sqlite3
+import pandas as pd
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
+from config import IFXDocFolder
+from core.chat import chat
 
-app = FastAPI()
+# Define paths
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+db_path = os.path.join(ROOT_DIR, IFXDocFolder.pre_folder, IFXDocFolder.FOLDER, IFXDocFolder.user_db)
 
-# Allow frontend from localhost
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Or restrict to your frontend origin
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)  # Enable CORS
 
-@app.post("/process")
-async def process_file(file: UploadFile = File(...), prompt: str = Form(...)):
+@app.route('/process', methods=['POST'])
+def report_generation():
+    user_account = "Deepanshu"
+    dataframe = pd.DataFrame()
+    query_list = []
+    answer_list = []
+
     try:
-        # Read file into DataFrame
-        content = await file.read()
-        df = pd.read_csv(io.BytesIO(content))
+        # Check if file and prompt are in request
+        if 'file' not in request.files or 'prompt' not in request.form:
+            return jsonify({'error': 'File or prompt missing'}), 400
 
-        # Example: Use the prompt (very basic interpretation here)
-        # In production, you'd use NLP, rules, or LLMs
-        if "filter" in prompt.lower():
-            # Example: filter rows where first column is not null
-            filtered_df = df.dropna(subset=[df.columns[0]])
-            data = filtered_df.to_dict(orient="records")
-        elif "summary" in prompt.lower():
-            data = df.describe().reset_index().to_dict(orient="records")
-        else:
-            # Default: show first 5 rows
-            data = df.head().to_dict(orient="records")
+        file = request.files['file']
+        prompt = request.form['prompt']
 
-        return JSONResponse(content={"data": data})
+        # Read CSV into DataFrame
+        df = pd.read_csv(file)
+
+        for query in df['questions']:
+            query_uuid = str(uuid.uuid4())
+
+            # Connect to SQLite DB and get account name
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute('''SELECT account FROM USER_TABLE WHERE user=?''', (user_account,))
+            d = cursor.fetchall()
+            account_name = d[0][0] if d else ""
+            conn.close()
+
+            # Call the `chat` function
+            collected = []
+            for chunk in chat(query, query_uuid, account_name, user_account):
+                collected.append(chunk)
+
+            query_list.append(query)
+            answer_list.append(' '.join(collected))
+
+        # Create output CSV
+        dataframe['Questions'] = query_list
+        dataframe['Answer'] = answer_list
+        output = io.StringIO()
+        dataframe.to_csv(output, index=False)
+        output.seek(0)
+
+        return send_file(
+            io.BytesIO(output.getvalue().encode()),
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name='result.csv'
+        )
 
     except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+        return jsonify({'error': str(e)}), 500
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
