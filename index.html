@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Infineon Discover</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f8f9fa;
+      color: #333;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #333;
+    }
+
+    .explore-section h2,
+    .trending-section h2 {
+      margin-top: 10px;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    .card-grid {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 16px;
+      margin-bottom: 10px;
+      padding-bottom: 20px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .card {
+      flex: 0 0 250px;
+      background: #fff;
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+      scroll-snap-align: start;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+    }
+
+    .card span {
+      display: block;
+      margin-top: 8px;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .trending-prompts {
+      list-style: none;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .trending-prompts li {
+      padding: 14px 16px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .trending-prompts li:hover {
+      background: #f1f1f1;
+    }
+
+    .trending-prompts li:last-child {
+      border-bottom: none;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #ffffff;
+      border-top: 1px solid #ccc;
+      padding: 10px 12px; /* reduced side padding */
+    }
+
+    .input-bar {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-bar input {
+      width: 100%;
+      padding: 12px 48px 12px 16px;
+      font-size: 1rem;
+      border: 1px solid #00796b;
+      border-radius: 24px;
+      outline: none;
+      background-color: #fff;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .input-bar button {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #00796b;
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Discover</h1>
+  </header>
+
+  <main>
+    <section class="explore-section">
+      <h2>Explore</h2>
+      <div class="card-grid">
+        <div class="card">Product information<br><span>Provides detailed insights into Infineon products, including technical specifications, features, benefits, and applications</span></div>
+        <div class="card">Tech Support<br><span>Searches developer forums and GitHub repositories for implementation examples, troubleshooting, and more</span></div>
+        <div class="card">X-Selling information<br><span>Insights into related Infineon products for expanded use cases</span></div>
+        <div class="card">Competitor Alternatives<br><span>Suggests Infineon alternatives to competitor components</span></div>
+        <div class="card">Bill of Materials<br><span>Assists with BOM creation and optimization</span></div>
+        <div class="card">Collateral Information<br><span>Quick access to datasheets, app notes, and technical reports</span></div>
+      </div>
+    </section>
+
+    <section class="trending-section">
+      <h2>Trending prompts</h2>
+      <ul class="trending-prompts">
+        <li>Provide me Mosfet 100 v with lowest RDSon</li>
+        <li>Xdp710-002可和哪些MOSFET 组合使用？</li>
+        <li>IMYH120R012M1H 内部有几颗芯片</li>
+        <li>IMZ120R030M1H 和IMZA120R030M1H的差异有哪些，他们的芯片大小一样吗？</li>
+        <li>1200V 75A IGBT对有多少Rdson的sic mos</li>
+        <li>Does onsemi have a similar product to IMZC120R022M2H?</li>
+        <li>what are infineon alternatives for TLE4285G</li>
+        <li>请为1.5HP的母婴护理恒温器电机推荐一个适合的IPM型号</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <div class="input-bar">
+      <input type="text" placeholder="Ask ISA..." />
+      <button>➤</button>
+    </div>
+  </footer>
+  
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const cards = document.querySelectorAll(".card");
+    const trendingItems = document.querySelectorAll(".trending-prompts li");
+    const inputBox = document.querySelector(".input-bar input");
+
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        inputBox.value = card.textContent.trim();
+        inputBox.focus();
+      });
+    });
+
+    trendingItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        inputBox.value = item.textContent.trim();
+        inputBox.focus();
+      });
+    });
+  });
+</script>
+</body>
+</html>
+
