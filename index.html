@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Infineon Discover</title>
   <style>
+    /* --- Same styles as before --- */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -216,53 +217,49 @@
       const sendButton = document.querySelector(".input-bar button");
       const chatHistory = document.getElementById("chatHistory");
 
-      // Card click fills input
-      cards.forEach((card) => {
-        card.addEventListener("click", () => {
-          inputBox.value = card.textContent.trim();
-          inputBox.focus();
-        });
-      });
+      // Connect to WebSocket server
+      const socket = new WebSocket("ws://localhost:3000"); // 🔁 CHANGE THIS URL TO YOUR SERVER
 
-      // Trending click fills input
-      trendingItems.forEach((item) => {
-        item.addEventListener("click", () => {
-          inputBox.value = item.textContent.trim();
-          inputBox.focus();
-        });
-      });
+      socket.onopen = () => {
+        console.log("WebSocket connected.");
+      };
 
-      // Send on button click
-      sendButton.addEventListener("click", async () => {
-        const userMessage = inputBox.value.trim();
-        if (!userMessage) return;
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        addMessageToChat("bot", "WebSocket connection error.");
+      };
 
-        addMessageToChat("user", userMessage);
-        inputBox.value = "";
-
-        try {
-          const response = await fetch("https://your-api-endpoint.com/chat", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ message: userMessage })
-          });
-
-          const data = await response.json();
-
-          if (data && data.reply) {
-            addMessageToChat("bot", data.reply);
-          } else {
-            addMessageToChat("bot", "Sorry, I couldn't understand the response.");
-          }
-        } catch (error) {
-          console.error("Error:", error);
-          addMessageToChat("bot", "An error occurred while connecting to the server.");
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data && data.reply) {
+          addMessageToChat("bot", data.reply);
+        } else {
+          addMessageToChat("bot", "No valid response from server.");
         }
-      });
+      };
 
-      // Chat rendering
+      // Send user message over WebSocket
+      function sendMessage() {
+        const message = inputBox.value.trim();
+        if (!message || socket.readyState !== WebSocket.OPEN) return;
+
+        addMessageToChat("user", message);
+        socket.send(JSON.stringify({ message }));
+        inputBox.value = "";
+      }
+
+      sendButton.addEventListener("click", sendMessage);
+
+      cards.forEach(card => card.addEventListener("click", () => {
+        inputBox.value = card.textContent.trim();
+        inputBox.focus();
+      }));
+
+      trendingItems.forEach(item => item.addEventListener("click", () => {
+        inputBox.value = item.textContent.trim();
+        inputBox.focus();
+      }));
+
       function addMessageToChat(sender, text) {
         const msgDiv = document.createElement("div");
         msgDiv.className = `chat-message ${sender}`;
@@ -270,6 +267,14 @@
         chatHistory.appendChild(msgDiv);
         chatHistory.scrollTop = chatHistory.scrollHeight;
       }
+
+      // Optional: send message on Enter key
+      inputBox.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
     });
   </script>
 </body>
