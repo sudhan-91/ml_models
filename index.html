@@ -92,6 +92,31 @@
       border-bottom: none;
     }
 
+    .chat-history {
+      margin: 20px 0;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .chat-message {
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .chat-message.user {
+      text-align: right;
+      color: #00796b;
+    }
+
+    .chat-message.bot {
+      text-align: left;
+      color: #333;
+    }
+
     footer {
       position: fixed;
       bottom: 0;
@@ -99,7 +124,7 @@
       width: 100%;
       background: #ffffff;
       border-top: 1px solid #ccc;
-      padding: 10px 12px; /* reduced side padding */
+      padding: 10px 12px;
     }
 
     .input-bar {
@@ -172,6 +197,8 @@
         <li>请为1.5HP的母婴护理恒温器电机推荐一个适合的IPM型号</li>
       </ul>
     </section>
+
+    <section class="chat-history" id="chatHistory"></section>
   </main>
 
   <footer>
@@ -180,28 +207,70 @@
       <button>➤</button>
     </div>
   </footer>
-  
+
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const cards = document.querySelectorAll(".card");
-    const trendingItems = document.querySelectorAll(".trending-prompts li");
-    const inputBox = document.querySelector(".input-bar input");
+    document.addEventListener("DOMContentLoaded", function () {
+      const cards = document.querySelectorAll(".card");
+      const trendingItems = document.querySelectorAll(".trending-prompts li");
+      const inputBox = document.querySelector(".input-bar input");
+      const sendButton = document.querySelector(".input-bar button");
+      const chatHistory = document.getElementById("chatHistory");
 
-    cards.forEach((card) => {
-      card.addEventListener("click", () => {
-        inputBox.value = card.textContent.trim();
-        inputBox.focus();
+      // Card click fills input
+      cards.forEach((card) => {
+        card.addEventListener("click", () => {
+          inputBox.value = card.textContent.trim();
+          inputBox.focus();
+        });
       });
-    });
 
-    trendingItems.forEach((item) => {
-      item.addEventListener("click", () => {
-        inputBox.value = item.textContent.trim();
-        inputBox.focus();
+      // Trending click fills input
+      trendingItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          inputBox.value = item.textContent.trim();
+          inputBox.focus();
+        });
       });
+
+      // Send on button click
+      sendButton.addEventListener("click", async () => {
+        const userMessage = inputBox.value.trim();
+        if (!userMessage) return;
+
+        addMessageToChat("user", userMessage);
+        inputBox.value = "";
+
+        try {
+          const response = await fetch("https://your-api-endpoint.com/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: userMessage })
+          });
+
+          const data = await response.json();
+
+          if (data && data.reply) {
+            addMessageToChat("bot", data.reply);
+          } else {
+            addMessageToChat("bot", "Sorry, I couldn't understand the response.");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          addMessageToChat("bot", "An error occurred while connecting to the server.");
+        }
+      });
+
+      // Chat rendering
+      function addMessageToChat(sender, text) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `chat-message ${sender}`;
+        msgDiv.textContent = text;
+        chatHistory.appendChild(msgDiv);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      }
     });
-  });
-</script>
+  </script>
 </body>
 </html>
-
