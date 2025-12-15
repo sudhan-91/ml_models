@@ -1,0 +1,80 @@
+import requests
+import json
+
+
+# Prepare the payload with the pipeline serialized as a string
+payload = {
+  "nodes": [
+    {
+      "component_type": "config",
+      "component_id": "id_config",
+      "framework" : ["langraph", "agno"]
+    },
+    {
+      
+      "component_type": "agent",
+      "component_name": "Master Agent",
+      "component_id": "id_master_agent",
+      "system_prompt":"You are a database assistant specialized in generating realistic healthcare data for a hospital/EMR system. ",
+      "tools" : "[patient_management_agent, appointment_scheduling_agent, medical_record_agent, prescription_lab_agent]",
+      "models": ["gpt-4o", "gpt-5"]
+      },
+      "use_reasoning" : True,
+    },
+    {
+      "component_type": "agent",
+      "component_name": "patient_management_agent",
+      "agent_info" : "The Patient Management Agent manages the creation, validation, and updating of patient records and contact information, ensuring accuracy, consistency, and integrity across the healthcare system; it collects and verifies essential patient details (name, DOB, gender), maintains phone numbers, emails, addresses, and emergency contacts, keeps records current, supports data exchange across systems, and works primarily with the patients table for demographics and status and the patient_contact_info table for contact details linked via patient_id.",
+      "tools" : [{
+          "tool_name" : "text_to_sql",
+          "prompt":"You are an expert Text-to-SQL generator for a healthcare database.\nStrictly follow the provided schema {DDL}.\nUse ILIKE for all applicable columns.\nReturn only SQL with correct table and column names.\nInclude all relevant information from all tables.\nNever assume nonexistent columns.\nFor missing constraints, choose the safest logic.\nEnsure the SQL is valid PostgreSQL.\nUser Query:",
+          "models": ["gpt-4o", "gpt-5"],
+          "use_reasoning" : True
+      }]
+      },
+     
+    {
+      "component_type": "agent",
+      "component_name": "appointment_scheduling_agent",
+      "component_id": "id_appointment_scheduling_agent",
+      "component_status": "",
+      "agent_info": "Appointment Scheduling Agent manages patient appointments within a healthcare workflow, automating scheduling, resolving conflicts, and ensuring compliance with provider availability, clinic policies, and patient preferences.\nCore responsibilities:\n- Schedule, modify, or cancel appointments with audit trail.\n- Check for conflicts, double-bookings, and resource constraints.\n- Send follow-up prompts or alternative time slots.\n- Coordinate with other agents to maintain consistent records.\n- Provide summaries of upcoming appointments or changes.",
+        "tools" : [{
+          "tool_name" : "text_to_sql",
+          "system_prompt":"You are an expert Text-to-SQL generator for a healthcare database.\nStrictly follow the provided schema {DDL}.\nUse ILIKE for all applicable columns.\nReturn only SQL with correct table and column names.\nInclude all relevant information from all tables.\nNever assume nonexistent columns.\nFor missing constraints, choose the safest logic.\nEnsure the SQL is valid PostgreSQL.\nUser Query:",
+          "models": ["gpt-4o", "gpt-5"],
+          "use_reasoning" : True
+
+      }]
+    },
+    {
+      "component_type": "agent",
+      "component_name": "medical_record_agent",
+      "component_id": "id_medical_record_agent",
+      "component_status": "",
+        "agent_info": "Medical Record Agent manages diagnostic test orders, patient encounters, medical history, clinical notes, and allergy information, ensuring accuracy, integrity, and proper routing of test orders.\nCore responsibilities:\n- Process diagnostic or lab test requests.\n- Validate patient info (medical history, allergies) before ordering.\n- Check for duplicate or conflicting test orders.\n- Route orders to appropriate services.\n- Update patient records with test, encounter, and order details.\n- Integrate medical history, clinical notes, and allergy records.\n- Provide confirmations or explanations when orders cannot be completed.\n- Maintain consistency across encounters, medical history, and notes.\nIntegration with patient data:\n- Medical History, Encounters, Clinical Notes, Allergies.\nDatabase tables:\n- medical_history, encounters, clinical_notes, allergies.",
+        "tools" : [{
+          "tool_name" : "text_to_sql",
+          "system_prompt":"You are an expert Text-to-SQL generator for a healthcare database.\nStrictly follow the provided schema {DDL}.\nUse ILIKE for all applicable columns.\nReturn only SQL with correct table and column names.\nInclude all relevant information from all tables.\nNever assume nonexistent columns.\nFor missing constraints, choose the safest logic.\nEnsure the SQL is valid PostgreSQL.\nUser Query:",
+          "models": ["gpt-4o", "gpt-5"],
+          "use_reasoning" : True
+
+      }]
+    },
+    {
+      "component_type": "agent",
+      "component_name": "prescription_lab_agent",
+      "component_id": "id_prescription_lab_agent",
+      "agent_info": "Prescription and Test Result Enquiry Agent manages the retrieval, summarization, and communication of diagnostic test results within a clinical workflow, ensuring timely access, proper documentation, and routing to relevant recipients.\nCore responsibilities:\n- Retrieve patient-specific test results.\n- Verify availability and completeness.\n- Provide structured summaries with status indicators.\n- Notify or route results to appropriate agents or workflows.\n- Handle queries on missing, delayed, or incomplete results.\n- Maintain accurate updates to patient records.\n- Coordinate with other agents for comprehensive care.\nIntegration with patient data:\n- medications, test_orders, vaccinations.\nDatabase tables:\n- medications, test_orders, vaccinations.",
+        "tools" : [{
+          "tool_name" : "text_to_sql",
+          "system_prompt":"You are an expert Text-to-SQL generator for a healthcare database.\nStrictly follow the provided schema {DDL}.\nUse ILIKE for all applicable columns.\nReturn only SQL with correct table and column names.\nInclude all relevant information from all tables.\nNever assume nonexistent columns.\nFor missing constraints, choose the safest logic.\nEnsure the SQL is valid PostgreSQL.\nUser Query:",
+          "models": ["gpt-4o", "gpt-5"],
+          "use_reasoning" : True
+
+      }],
+      
+    }
+  ]
+}
+
