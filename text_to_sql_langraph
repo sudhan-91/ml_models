@@ -1,0 +1,87 @@
+from typing import TypedDict
+
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langgraph.graph import StateGraph, END
+
+
+# -----------------------------
+# 1. State
+# -----------------------------
+class TextToSQLState(TypedDict):
+    user_input: str
+    schema: str
+    sql: str
+
+
+# -----------------------------
+# 2. LLM
+# -----------------------------
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+
+# -----------------------------
+# 3. Node: Text → SQL
+# -----------------------------
+def generate_sql(state: TextToSQLState) -> TextToSQLState:
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are a Text-to-SQL generator.\n"
+                "Generate a valid SQL query using ONLY the provided schema.\n"
+                "Do NOT explain anything.\n"
+                "Return ONLY the SQL query."
+            ),
+            (
+                "human",
+                "Schema:\n{schema}\n\n"
+                "User request:\n{user_input}"
+            )
+        ]
+    )
+
+    chain = prompt | llm
+    sql = chain.invoke(
+        {
+            "schema": state["schema"],
+            "user_input": state["user_input"],
+        }
+    ).content.strip()
+
+    return {
+        "user_input": state["user_input"],
+        "schema": state["schema"],
+        "sql": sql,
+    }
+
+
+# -----------------------------
+# 4. Build LangGraph
+# -----------------------------
+graph = StateGraph(TextToSQLState)
+
+graph.add_node("generate_sql", generate_sql)
+graph.set_entry_point("generate_sql")
+graph.add_edge("generate_sql", END)
+
+app = graph.compile()
+
+
+# -----------------------------
+# 5. Example
+# -----------------------------
+if __name__ == "__main__":
+    schema = """
+    customers(id, name, city)
+    orders(id, customer_id, total_amount, created_at)
+    """
+
+    result = app.invoke(
+        {
+            "user_input": "Total order amount per customer",
+            "schema": schema,
+        }
+    )
+
+    print(result["sql"])
