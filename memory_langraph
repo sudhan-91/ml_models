@@ -1,0 +1,106 @@
+from typing import TypedDict, Optional
+
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langgraph.graph import StateGraph, END
+
+
+# -----------------------------
+# 1. State
+# -----------------------------
+class RewriteState(TypedDict):
+    user_input: str
+    memory: Optional[str]          # previous memory / context
+    rewritten_input: str
+    memory_used: bool
+
+
+# -----------------------------
+# 2. LLM
+# -----------------------------
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+
+# -----------------------------
+# 3. Node: decide + rewrite
+# -----------------------------
+def rewrite_with_memory(state: RewriteState) -> RewriteState:
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are a context-aware query rewriter.\n\n"
+                "Task:\n"
+                "1. Decide whether the user's message depends on the previous memory.\n"
+                "2. If YES, rewrite the message into a standalone question using the memory.\n"
+                "3. If NO, ignore the memory.\n\n"
+                "Rules:\n"
+                "- Respond in JSON ONLY\n"
+                "- Keys: use_memory (true/false), rewritten\n"
+            ),
+            (
+                "human",
+                "Previous memory:\n"
+                "{memory}\n\n"
+                "User message:\n"
+                "{user_input}"
+            )
+        ]
+    )
+
+    chain = prompt | llm
+    response = chain.invoke(
+        {
+            "memory": state.get("memory") or "NONE",
+            "user_input": state["user_input"],
+        }
+    ).content
+
+    import json
+    result = json.loads(response)
+
+    return {
+        "user_input": state["user_input"],
+        "memory": state["memory"] if result["use_memory"] else None,
+        "rewritten_input": result["rewritten"],
+        "memory_used": result["use_memory"],
+    }
+
+
+# -----------------------------
+# 4. Build LangGraph
+# -----------------------------
+graph = StateGraph(RewriteState)
+
+graph.add_node("rewrite_with_memory", rewrite_with_memory)
+graph.set_entry_point("rewrite_with_memory")
+graph.add_edge("rewrite_with_memory", END)
+
+app = graph.compile()
+
+
+# -----------------------------
+# 5. Examples
+# -----------------------------
+if __name__ == "__main__":
+
+    # Case 1: Memory IS needed
+    result = app.invoke(
+        {
+            "user_input": "What about the weather there?",
+            "memory": "User lives in Berlin"
+        }
+    )
+    print(result)
+    # rewritten_input:
+    # "What is the weather in Berlin?"
+
+    # Case 2: Memory NOT needed
+    result = app.invoke(
+        {
+            "user_input": "Explain how photosynthesis works",
+            "memory": "User lives in Berlin"
+        }
+    )
+    print(result)
+    # memory is erased
