@@ -1,0 +1,2 @@
+response = llm.invoke({"messages": [{"role": "user", "content": "SELECT * FROM users"}]})
+print(response.content)
