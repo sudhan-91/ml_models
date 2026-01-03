@@ -1,0 +1,83 @@
+from typing import TypedDict, List
+
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langgraph.graph import StateGraph, END
+
+
+# -----------------------------
+# 1. Define dynamic state
+# -----------------------------
+class IntentState(TypedDict):
+    user_input: str
+    intents: List[str]     # dynamic intent labels from API
+    intent: str            # predicted intent
+
+
+# -----------------------------
+# 2. LLM
+# -----------------------------
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+
+# -----------------------------
+# 3. Node: classify intent
+# -----------------------------
+def classify_intent(state: IntentState) -> IntentState:
+    intents = state["intents"]
+    intent_list = "\n".join(f"- {i}" for i in intents)
+
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are an intent classifier.\n"
+                "Classify the user's message into ONE of the following intents:\n"
+                f"{intent_list}\n\n"
+                "Respond with ONLY the intent label."
+            ),
+            ("human", "{user_input}")
+        ]
+    )
+
+    chain = prompt | llm
+    predicted = chain.invoke(
+        {"user_input": state["user_input"]}
+    ).content.strip()
+
+    # safety fallback
+    if predicted not in intents:
+        predicted = "unknown"
+
+    return {
+        "user_input": state["user_input"],
+        "intents": intents,
+        "intent": predicted,
+    }
+
+
+# -----------------------------
+# 4. Build LangGraph
+# -----------------------------
+graph = StateGraph(IntentState)
+
+graph.add_node("classify_intent", classify_intent)
+graph.set_entry_point("classify_intent")
+graph.add_edge("classify_intent", END)
+
+app = graph.compile()
+
+
+# -----------------------------
+# 5. Run example (API-like input)
+# -----------------------------
+if __name__ == "__main__":
+    result = app.invoke(
+        {
+            "user_input": "Hi there, good morning!",
+            "intents": ["greeting", "question", "complaint", "feedback"]
+        }
+    )
+
+    print(result)
+    # {'intent': 'greeting', ...}
