@@ -1,85 +1,27 @@
-shipment_questions = {
-    "questions": [
-        "Which ship from location MAL ships the highest number of material no items?",
-        "How many unique material no were delivered from the ship from location SGP?",
-        "What is the average quantity per material no shipped from DCE?",
-        "Which material no were shipped from more than one ship from location SGP?",
-        "Which material no had the highest total quantity shipped to the region APAC?",
-        "How many material no items with quantity above 5000 were shipped to EUROPE?",
-        "Which lot number ZA749025G01 corresponds to shipments from MAL?",
-        "Which sold to name MANDO CORPORATION received shipments in multiple ship to countries?",
-        "Which region JAPAN received the largest total shipment quantity?",
-        "For the sold to region APAC, what is the total quantity delivered?",
-        "Which ship to country Korea, Republic of had the earliest recorded delivery date?",
-        "Which combination of sold to name MANDO CORPORATION and ship to name HYUNDAI AUTRON occurs most frequently?",
-        "How many shipments were made to the region JAPAN during 2019?",
-        "What is the most common ship from location for deliveries to Korea, Republic of?",
-        "Which ship to city YOKOHAMA SHI received the largest shipment quantity?",
-        "Which sold to country China corresponds to the highest number of unique tracking numbers?",
-        "How does shipment quantity distribution vary between APAC and EUROPE?",
-        "What is the average time gap between the datecode 1812 and its delivery date?",
-        "Which month 201903 saw the highest shipment quantity?",
-        "Are shipments with older datecodes like 1812 concentrated in the ship from location SGP?",
-        "Did the region JAPAN have consistent deliveries during 2019?",
-        "Which ship from location handled the most shipments in March 2019?",
-        "Which sold to name INFINEON TECHNOLOGIES KOREA had continuous shipments across multiple months?",
-        "For the new region China, what is the latest delivery date recorded?",
-        "How does the average quantity change between December 2018 and June 2019?",
-        "Which ship to country Germany received shipments with the most recent datecode 1946?",
-        "Which dispatch note 6501219663 corresponds to multiple tracking numbers?",
-        "Which ship from location MAL generated the highest number of dispatch note records?",
-        "Which tracking number STJ140927 corresponds to the largest shipment quantity?",
-        "Which lot number ZA834035G12 appears in more than one dispatch note?",
-        "Which ship to city INCHEON-SI is associated with the most unique tracking numbers?",
-        "Which ship to country India has the highest average quantity per dispatch note?",
-        "What is the typical number of tracking numbers per sold to region EUROPE?",
-        "Which ship to type 4009659 corresponds to the highest total quantity shipped?",
-        "How many dispatch note records exist for the sold to country Japan?",
-        "Compare total shipments between the sold to region APAC and the ship to region EUROPE.",
-        "Are all shipments to MANDO CORPORATION originating from the ship from location SGP?",
-        "Does the customer LG INNOTEK CO LTD have shipments sent to the new region JAPAN?",
-        "For the ship from location DCE, which ship to country China receives the most material numbers?",
-        "Which lot number ZA841494G02 corresponds to shipments made to both APAC and EUROPE?",
-        "Which region NAFTA has the highest number of distinct material numbers?",
-        "What proportion of total shipments have quantity below 500 compared to above 5000?",
-        "Which sold to region EUROPE accounts for the majority of shipments from SFO?",
-        "How many shipments were made where the ship to country India differs from the sold to country Singapore?",
-        "Which region APAC received the most unique material numbers in October 2019 (201910)?"
-    ]
-}
+You are a deterministic Text-to-SQL engine for the database vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_basic_information. Your first and most important task is to correctly identify which column(s) the user’s identifier belongs to before forming SQL. An identifier may match more than one column. You MUST follow the routing rules below strictly.
 
+IDENTIFIER ROUTING RULES (MULTIPLE COLUMNS ALLOWED):
 
-user_perspective_questions = {
-    "questions": [
-        "What is the delivery date for material no MA001924756 shipped from MAL?",
-        "How many units of material no MA005708430 were included in dispatch note 4028409589?",
-        "Which ship from location handled the shipment for tracking number STJ140181?",
-        "When was the shipment with lot ZA834035G06 delivered?",
-        "What was the total quantity shipped to HYUNDAI AUTRON in March 2019?",
-        "From which ship from location was dispatch note 6501247288 issued?",
-        "Which sold to region APAC had the highest shipment quantity in June 2019?",
-        "What is the datecode for material no MA005423453 shipped to LG INNOTEK CO LTD?",
-        "How many dispatch notes were created for the ship to region EUROPE in 2019?",
-        "What is the ship to country for dispatch note 6501316405?",
-        "Which sold to country Japan received the shipment with lot ZA841494G39?",
-        "What is the ship to city for tracking number 371607110?",
-        "Which ship to region JAPAN received the material no MA001675882?",
-        "How many shipments from SGP were delivered in May 2019 (201905)?",
-        "What is the sold to name for customer number 4003778?",
-        "Which delivery date corresponds to the shipment with tracking number 1764859585?",
-        "How many unique material numbers were shipped to China in June 2019 (201906)?",
-        "What was the total quantity shipped from DCE in July 2019 (201907)?",
-        "Which lot ZA841494G22 was associated with which dispatch note?",
-        "What is the new region for sold to name INFINEON TECHNOLOGIES KOREA?",
-        "Which ship from location delivered to ship to city SUZHOU?",
-        "What is the total quantity of shipments sent from SFO to United States?",
-        "What was the fdla_datecode used in the shipment to MANDO HELLA ELECTRONICS?",
-        "How many shipments were sent from MAL to ship to region APAC in 2019?",
-        "Which sold to region EUROPE includes the customer MITSUBISHI ELECTRIC CORPORATION?",
-        "What is the dispatch note number for the shipment with tracking no 483558878933?",
-        "Which month (ddat_bm_yyyymm = 201903) had shipments to LG INNOTEK CO LTD?",
-        "What was the delivery date of the shipment with datecode 1903?",
-        "Which ship to name DABO CORPORATION received the material lot ZA841494G31?",
-        "How many total shipments were made to sold to country India in 2019?"
-    ]
-}
+1. SP Material: If value starts with "SP" and length = 11 → route to msai_sp_sap_matnr
+
+2. MA Material: If value starts with "MA" and length = 11 → route to mbno_fp_sap_matnr
+
+3. PACKAGE Grammar: If matches ^(PG|P|T|H|A|SG)-[A-Z0-9][A-Z0-9._]{1,30}(-\d+){1,4}$ → route to packagename
+
+4. BASIC TYPE: If matches ^[A-Z][0-9]{4}[A-Z]$ → route to basic_type
+
+5. BAUNUMBER: If numeric and starts with 9 and length = 8 → route to baunumber
+
+6. PROCESS GROUP: If matches ^[A-Z0-9]{2,12}(_[A-Z0-9]{1,6})?$ AND contains at least one letter → route to processgroup
+
+7. FINAL FALLBACK: If none of the above matches, or if the identifier looks like msai_opn or sales_name:
+→ route to BOTH msai_opn and sales_name using OR in SQL.  
+Example: WHERE msai_opn='<identifier>' OR sales_name='<identifier>'
+
+SQL GENERATION RULES:
+
+- Include **all matched routing columns** in the WHERE clause using OR.  
+- msai_opn and sales_name **always use OR together** to avoid missing matches.  
+- Never include msai_opn or sales_name alone if other routing columns matched.  
+- Always generate deterministic SQL based on routing.  
+- Each identifier may generate multiple columns, but never more than necessary.
