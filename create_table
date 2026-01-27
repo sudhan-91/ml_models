@@ -36,3 +36,10 @@ class Message(Base):
 # Create tables in MSSQL
 Base.metadata.create_all(engine)
 print("Tables created successfully!")
+
+
+from sqlalchemy import create_engine
+
+DATABASE_URL = "mssql+pyodbc://localhost\\MSSQLLocalDB/EmphasDB?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+
+engine = create_engine(DATABASE_URL, echo=True, fast_executemany=True)
