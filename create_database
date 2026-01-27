@@ -1,0 +1,33 @@
+import pyodbc
+
+SERVER = "localhost"        # or "SERVER\\INSTANCE"
+USERNAME = "sa"
+PASSWORD = "your_password"
+DB_NAME = "my_database"
+
+# Connect to master database
+conn = pyodbc.connect(
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+    f"SERVER={SERVER};"
+    f"DATABASE=master;"
+    f"UID={USERNAME};"
+    f"PWD={PASSWORD};",
+    autocommit=True  # IMPORTANT for CREATE DATABASE
+)
+
+cursor = conn.cursor()
+
+# Check if DB exists
+cursor.execute(
+    "SELECT name FROM sys.databases WHERE name = ?", DB_NAME
+)
+exists = cursor.fetchone()
+
+if exists:
+    print(f"Database already exists: {DB_NAME}")
+else:
+    cursor.execute(f"CREATE DATABASE [{DB_NAME}]")
+    print(f"Database created successfully: {DB_NAME}")
+
+cursor.close()
+conn.close()
