@@ -1,14 +1,53 @@
-async def invoke_product_bot_stream(self, payload):
-    try:
-        async for event in self.graph_app.astream_events(payload, version="v1"):
-            if event["event"] == "on_llm_stream":
-                token = event["data"]["chunk"].content
-                if token:
-                    yield token
-    except Exception:
-        print(f'Error in invoke_product_bot_stream {traceback.print_exc()}')
-        yield "\n[ERROR]\n"
+import requests
+import json
+import time
 
+URL = "http://localhost:8101/qm_bot/chatbot"
+
+payload = {
+    "user_id": "test_user",
+    "user_input": "show top 10 customers",
+    "usecase_name": "product_bot"
+}
+
+print("Connecting to streaming endpoint...\n")
+
+with requests.post(URL, json=payload, stream=True, timeout=120) as response:
+    response.raise_for_status()
+
+    print("Streaming started:\n")
+
+    for raw_line in response.iter_lines(decode_unicode=True):
+        if not raw_line:
+            continue
+
+        try:
+            event = json.loads(raw_line)
+        except json.JSONDecodeError:
+            print("⚠ Non-JSON chunk:", raw_line)
+            continue
+
+        event_type = event.get("type")
+
+        if event_type == "node_start":
+            print(f"▶ NODE STARTED : {event['node']}")
+
+        elif event_type == "node_end":
+            print(f"✔ NODE ENDED   : {event['node']}")
+            if event.get("output"):
+                print(f"   OUTPUT      : {event['output']}")
+
+        elif event_type == "token":
+            print(event["value"], end="", flush=True)
+
+        elif event_type == "error":
+            print(f"\n❌ ERROR: {event['message']}")
+
+        else:
+            print("ℹ UNKNOWN EVENT:", event)
+
+print("\n\nStreaming finished.")
+self.question_classifierself.question_classifier
 
 
 import json
