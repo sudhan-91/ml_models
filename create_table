@@ -33,3 +33,18 @@ class ChatMessage(Base):
 # Create tables
 Base.metadata.create_all(engine)
 print("Tables created successfully!")
+
+
+from sqlalchemy import insert
+
+with engine.begin() as conn:
+    conn.execute(
+        insert(ChatMessage).values(
+            conversation_id=str(uuid.uuid4()),
+            user_id="user_123",
+            message="Hi",
+            model_response="Hello!",
+            latency_ms=120,
+            bot_invoked=True
+        )
+    )
