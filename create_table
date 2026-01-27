@@ -6,16 +6,11 @@ Base = declarative_base()
 # Database name
 db_name = "emphas_db"
 
-# Connect to master to create DB if not exists
-engine_master = create_engine(
-    "mssql+pyodbc://sa:YourPassword@localhost:1433/master?driver=ODBC+Driver+17+for+SQL+Server",
-    echo=True,
-    fast_executemany=True
-)
-
 with engine_master.connect() as conn:
-    conn.execute(text(f"IF DB_ID('{db_name}') IS NULL CREATE DATABASE {db_name}"))
-    print(f"Database '{db_name}' is ready!")
+    result = conn.execute(
+        text("SELECT 1 FROM sys.databases WHERE name = :db_name"),
+        {"db_name": db_name}
+    ).fetchone()
 
 # Connect to the actual database
 DATABASE_URL = f"mssql+pyodbc://sa:YourPassword@localhost:1433/{db_name}?driver=ODBC+Driver+17+for+SQL+Server"
