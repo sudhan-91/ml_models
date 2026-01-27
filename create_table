@@ -1,0 +1,70 @@
+import json
+import pyodbc
+
+JSON_FILE = "schema.json"
+DB_NAME = "my_database"
+SERVER = "localhost"
+USERNAME = "sa"
+PASSWORD = "your_password"
+
+# -------------------------
+# Connect to target database
+# -------------------------
+conn = pyodbc.connect(
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+    f"SERVER={SERVER};"
+    f"DATABASE={DB_NAME};"
+    f"UID={USERNAME};"
+    f"PWD={PASSWORD};",
+    autocommit=True
+)
+
+cursor = conn.cursor()
+
+# -------------------------
+# Load JSON schema
+# -------------------------
+with open(JSON_FILE, "r") as f:
+    config = json.load(f)
+
+tables = config["postgres_config"]["postgres_tables"]
+schemas = config["postgres_config"]["schema"]
+
+# -------------------------
+# Create tables
+# -------------------------
+for schema_key, schema_def in schemas.items():
+
+    # Match schema name to table name
+    # example: batch_extraction_tracking_db_schema → batch_extraction_tracking
+    table_name = schema_key.replace("_db_schema", "")
+
+    if table_name not in tables.values():
+        print(f"Skipping unmatched schema: {schema_key}")
+        continue
+
+    columns = schema_def["table_columns"]
+
+    column_defs = []
+    for col in columns:
+        col_type = schema_def[col]
+        column_defs.append(f"[{col}] {col_type}")
+
+    ddl = f"""
+    IF NOT EXISTS (
+        SELECT * FROM sys.tables WHERE name = '{table_name}'
+    )
+    BEGIN
+        CREATE TABLE [{table_name}] (
+            {", ".join(column_defs)}
+        )
+    END
+    """
+
+    print(f"Creating table: {table_name}")
+    cursor.execute(ddl)
+
+cursor.close()
+conn.close()
+
+print("\n✅ Table creation completed")
