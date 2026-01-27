@@ -48,3 +48,44 @@ with engine.begin() as conn:
             bot_invoked=True
         )
     )
+
+
+
+import uuid
+import json
+from sqlalchemy.orm import sessionmaker
+
+SessionLocal = sessionmaker(bind=engine)
+
+def insert_chat_message():
+    session = SessionLocal()
+    try:
+        chat = ChatMessage(
+            conversation_id=str(uuid.uuid4()),   # REQUIRED
+            user_id="user_123",
+            message="Hello, how are you?",
+            model_response="I'm good! How can I help you?",
+            latency_ms=210,
+            bot_invoked=True,
+            metadata_json=json.dumps({
+                "model": "gpt-4o",
+                "tokens_used": 180,
+                "temperature": 0.7
+            })
+            # ❌ id → auto
+            # ❌ created_at → auto
+        )
+
+        session.add(chat)
+        session.commit()
+        session.refresh(chat)   # fetch generated values
+
+        print("ID:", chat.id)
+        print("Created At:", chat.created_at)
+
+    except Exception as e:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
