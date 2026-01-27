@@ -1,70 +1,38 @@
-import json
-import pyodbc
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, create_engine
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.sql import func
 
-JSON_FILE = "schema.json"
-DB_NAME = "my_database"
-SERVER = "localhost"
-USERNAME = "sa"
-PASSWORD = "your_password"
+# MSSQL connection
+DATABASE_URL = "mssql+pyodbc://sa:YourPassword@localhost:1433/emphas_db?driver=ODBC+Driver+17+for+SQL+Server"
+engine = create_engine(DATABASE_URL, echo=True, fast_executemany=True)
 
-# -------------------------
-# Connect to target database
-# -------------------------
-conn = pyodbc.connect(
-    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-    f"SERVER={SERVER};"
-    f"DATABASE={DB_NAME};"
-    f"UID={USERNAME};"
-    f"PWD={PASSWORD};",
-    autocommit=True
-)
+Base = declarative_base()
 
-cursor = conn.cursor()
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    username = Column(String(100), nullable=False, unique=True)
+    email = Column(String(255), nullable=False, unique=True)
+    created_at = Column(DateTime, server_default=func.now())
 
-# -------------------------
-# Load JSON schema
-# -------------------------
-with open(JSON_FILE, "r") as f:
-    config = json.load(f)
+class Conversation(Base):
+    __tablename__ = "conversations"
+    conversation_id = Column(String(36), primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
 
-tables = config["postgres_config"]["postgres_tables"]
-schemas = config["postgres_config"]["schema"]
+    user = relationship("User", backref="conversations")
 
-# -------------------------
-# Create tables
-# -------------------------
-for schema_key, schema_def in schemas.items():
+class Message(Base):
+    __tablename__ = "messages"
+    id = Column(Integer, primary_key=True)
+    conversation_id = Column(String(36), ForeignKey("conversations.conversation_id"), index=True, nullable=False)
+    input_message = Column(Text)
+    model_response = Column(Text)
+    created_at = Column(DateTime, server_default=func.now())
 
-    # Match schema name to table name
-    # example: batch_extraction_tracking_db_schema → batch_extraction_tracking
-    table_name = schema_key.replace("_db_schema", "")
+    conversation = relationship("Conversation", backref="messages")
 
-    if table_name not in tables.values():
-        print(f"Skipping unmatched schema: {schema_key}")
-        continue
-
-    columns = schema_def["table_columns"]
-
-    column_defs = []
-    for col in columns:
-        col_type = schema_def[col]
-        column_defs.append(f"[{col}] {col_type}")
-
-    ddl = f"""
-    IF NOT EXISTS (
-        SELECT * FROM sys.tables WHERE name = '{table_name}'
-    )
-    BEGIN
-        CREATE TABLE [{table_name}] (
-            {", ".join(column_defs)}
-        )
-    END
-    """
-
-    print(f"Creating table: {table_name}")
-    cursor.execute(ddl)
-
-cursor.close()
-conn.close()
-
-print("\n✅ Table creation completed")
+# Create tables in MSSQL
+Base.metadata.create_all(engine)
+print("Tables created successfully!")
