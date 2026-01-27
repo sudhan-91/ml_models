@@ -1,56 +1,40 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, create_engine
-from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy.sql import func
-
-# MSSQL connection
-DATABASE_URL = "mssql+pyodbc://sa:YourPassword@localhost:1433/emphas_db?driver=ODBC+Driver+17+for+SQL+Server"
-engine = create_engine(DATABASE_URL, echo=True, fast_executemany=True)
-
-Base = declarative_base()
-
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
-    username = Column(String(100), nullable=False, unique=True)
-    email = Column(String(255), nullable=False, unique=True)
-    created_at = Column(DateTime, server_default=func.now())
-
-class Conversation(Base):
-    __tablename__ = "conversations"
-    conversation_id = Column(String(36), primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-
-    user = relationship("User", backref="conversations")
-
-class Message(Base):
-    __tablename__ = "messages"
-    id = Column(Integer, primary_key=True)
-    conversation_id = Column(String(36), ForeignKey("conversations.conversation_id"), index=True, nullable=False)
-    input_message = Column(Text)
-    model_response = Column(Text)
-    created_at = Column(DateTime, server_default=func.now())
-
-    conversation = relationship("Conversation", backref="messages")
-
-
-
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func
+from sqlalchemy import create_engine, text, Column, Integer, String, Text, DateTime, Boolean, func
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
+# Database name
+db_name = "emphas_db"
+
+# Connect to master to create DB if not exists
+engine_master = create_engine(
+    "mssql+pyodbc://sa:YourPassword@localhost:1433/master?driver=ODBC+Driver+17+for+SQL+Server",
+    echo=True,
+    fast_executemany=True
+)
+
+with engine_master.connect() as conn:
+    conn.execute(text(f"IF DB_ID('{db_name}') IS NULL CREATE DATABASE {db_name}"))
+    print(f"Database '{db_name}' is ready!")
+
+# Connect to the actual database
+DATABASE_URL = f"mssql+pyodbc://sa:YourPassword@localhost:1433/{db_name}?driver=ODBC+Driver+17+for+SQL+Server"
+engine = create_engine(DATABASE_URL, echo=True, fast_executemany=True)
+
+# Example table
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     conversation_id = Column(String(36), nullable=False, index=True)
     user_id = Column(String(50), nullable=True)
-    role = Column(String(20), nullable=False)  # user / assistant / system
     message = Column(Text, nullable=False)
     model_response = Column(Text, nullable=True)
-    parent_id = Column(Integer, nullable=True)
-    tokens_used = Column(Integer, nullable=True)
     latency_ms = Column(Integer, nullable=True)
+    bot_invoked = Column(Boolean, nullable=False, default=False)
     metadata_json = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+# Create tables
+Base.metadata.create_all(engine)
+print("Tables created successfully!")
