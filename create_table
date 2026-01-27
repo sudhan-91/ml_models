@@ -33,13 +33,24 @@ class Message(Base):
 
     conversation = relationship("Conversation", backref="messages")
 
-# Create tables in MSSQL
-Base.metadata.create_all(engine)
-print("Tables created successfully!")
 
 
-from sqlalchemy import create_engine
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func
+from sqlalchemy.orm import declarative_base
 
-DATABASE_URL = "mssql+pyodbc://localhost\\MSSQLLocalDB/EmphasDB?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+Base = declarative_base()
 
-engine = create_engine(DATABASE_URL, echo=True, fast_executemany=True)
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    conversation_id = Column(String(36), nullable=False, index=True)
+    user_id = Column(String(50), nullable=True)
+    role = Column(String(20), nullable=False)  # user / assistant / system
+    message = Column(Text, nullable=False)
+    model_response = Column(Text, nullable=True)
+    parent_id = Column(Integer, nullable=True)
+    tokens_used = Column(Integer, nullable=True)
+    latency_ms = Column(Integer, nullable=True)
+    metadata_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
