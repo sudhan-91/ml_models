@@ -1,91 +1,39 @@
-import requests
-import json
-import time
-
-URL = "http://localhost:8101/qm_bot/chatbot"
-
-payload = {
-    "user_id": "test_user",
-    "user_input": "show top 10 customers",
-    "usecase_name": "product_bot"
-}
-
-print("Connecting to streaming endpoint...\n")
-
-with requests.post(URL, json=payload, stream=True, timeout=120) as response:
-    response.raise_for_status()
-
-    print("Streaming started:\n")
-
-    for raw_line in response.iter_lines(decode_unicode=True):
-        if not raw_line:
-            continue
-
-        try:
-            event = json.loads(raw_line)
-        except json.JSONDecodeError:
-            print("⚠ Non-JSON chunk:", raw_line)
-            continue
-
-        event_type = event.get("type")
-
-        if event_type == "node_start":
-            print(f"▶ NODE STARTED : {event['node']}")
-
-        elif event_type == "node_end":
-            print(f"✔ NODE ENDED   : {event['node']}")
-            if event.get("output"):
-                print(f"   OUTPUT      : {event['output']}")
-
-        elif event_type == "token":
-            print(event["value"], end="", flush=True)
-
-        elif event_type == "error":
-            print(f"\n❌ ERROR: {event['message']}")
-
-        else:
-            print("ℹ UNKNOWN EVENT:", event)
-
-print("\n\nStreaming finished.")
-self.question_classifierself.question_classifier
-
-
-import json
-
-async def invoke_product_bot_stream(self, payload):
+async def invoke_product_streaming_bot(self, payload):
     try:
-        async for event in self.graph_app.astream_events(payload, version="v1"):
+        start_time = time.perf_counter()
+
+        yield "data: {\"type\": \"start\"}\n\n"
+
+        async for event in self.app.astream_events(payload, version="v1"):
             evt = event["event"]
             data = event["data"]
             name = event.get("name")
 
-            # Node started
             if evt == "on_chain_start":
-                yield json.dumps({
-                    "type": "node_start",
-                    "node": name
-                }) + "\n"
+                yield f"data: {json.dumps({'type': 'node_start', 'node': name})}\n\n"
 
-            # Node finished
             elif evt == "on_chain_end":
-                yield json.dumps({
-                    "type": "node_end",
-                    "node": name,
-                    "output": data.get("output")
-                }) + "\n"
+                yield f"data: {json.dumps({'type': 'node_end', 'node': name})}\n\n"
 
-            # LLM token streaming (optional)
             elif evt == "on_llm_stream":
                 chunk = data["chunk"].content
                 if chunk:
-                    yield json.dumps({
-                        "type": "token",
-                        "node": name,
-                        "value": chunk
-                    }) + "\n"
+                    yield f"data: {json.dumps({'type': 'token', 'value': chunk})}\n\n"
+
+        execution_time = time.perf_counter() - start_time
+
+        asyncio.create_task(
+            asyncio.to_thread(
+                sql_service.insert_chat_history,
+                payload['session_id'],
+                payload['user_id'],
+                payload['user_input'],
+                "",
+                f"{execution_time:.2f}",
+                "product_bot",
+                ""
+            )
+        )
 
     except Exception as e:
-        yield json.dumps({
-            "type": "error",
-            "message": str(e)
-        }) + "\n"
+        yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
