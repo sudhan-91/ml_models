@@ -37,3 +37,17 @@ async def invoke_product_streaming_bot(self, payload):
 
     except Exception as e:
         yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+
+with requests.post(url, json=payload, stream=True) as r:
+    r.raise_for_status()
+
+    for line in r.iter_lines(decode_unicode=True):
+        if not line:
+            continue
+
+        # SSE format: data: {...}
+        if line.startswith("data:"):
+            data = line.replace("data:", "").strip()
+            event = json.loads(data)
+            print(event)
