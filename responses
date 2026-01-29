@@ -1,53 +1,20 @@
-async def invoke_product_streaming_bot(self, payload):
-    try:
-        start_time = time.perf_counter()
+import requests
+import time
 
-        yield "data: {\"type\": \"start\"}\n\n"
+def wait_until_ready(url, timeout=10):
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            r = requests.get(url, timeout=0.5)
+            if r.status_code == 200:
+                print("✅ API service started")
+                return True
+        except Exception:
+            pass
+        time.sleep(0.5)
 
-        async for event in self.app.astream_events(payload, version="v1"):
-            evt = event["event"]
-            data = event["data"]
-            name = event.get("name")
-
-            if evt == "on_chain_start":
-                yield f"data: {json.dumps({'type': 'node_start', 'node': name})}\n\n"
-
-            elif evt == "on_chain_end":
-                yield f"data: {json.dumps({'type': 'node_end', 'node': name})}\n\n"
-
-            elif evt == "on_llm_stream":
-                chunk = data["chunk"].content
-                if chunk:
-                    yield f"data: {json.dumps({'type': 'token', 'value': chunk})}\n\n"
-
-        execution_time = time.perf_counter() - start_time
-
-        asyncio.create_task(
-            asyncio.to_thread(
-                sql_service.insert_chat_history,
-                payload['session_id'],
-                payload['user_id'],
-                payload['user_input'],
-                "",
-                f"{execution_time:.2f}",
-                "product_bot",
-                ""
-            )
-        )
-
-    except Exception as e:
-        yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+    print("❌ API failed to start")
+    return False
 
 
-with requests.post(url, json=payload, stream=True) as r:
-    r.raise_for_status()
-
-    for line in r.iter_lines(decode_unicode=True):
-        if not line:
-            continue
-
-        # SSE format: data: {...}
-        if line.startswith("data:"):
-            data = line.replace("data:", "").strip()
-            event = json.loads(data)
-            print(event)
+wait_until_ready("http://localhost:8000/health")
