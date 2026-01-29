@@ -18,3 +18,8 @@ def wait_until_ready(url, timeout=10):
 
 
 wait_until_ready("http://localhost:8000/health")
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
