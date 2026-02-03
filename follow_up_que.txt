@@ -1,0 +1,61 @@
+question
+"What is the assembly location for P4175J?"
+"Is the final test location the same as the assembly location?"
+
+"Can you provide the QA release date for 99924877?"
+"Was this product released before SP000096932?"
+
+"What are the ESD ratings for MA000057194?"
+"Are these ratings higher than those of SP000216514?"
+
+"What is the packaging type for ICE3B0565JFKLA1?"
+"Does BAV70E6327HTSA1 use the same packaging type?"
+
+"What is the moisture sensitivity level for TLE7810GXUMA1?"
+"Based on that, does SP000017457 require dry packing as well?"
+
+"Can you confirm the package name for P5156J?"
+"Is this package also used by 99972636?"
+
+"What is the wafer fab location for P2944X?"
+"Are there any other products tested at the same location, like SP000010350?"
+
+"What is the die size of IPB50R199CPATMA1?"
+"Is the die size compatible with the package used by AG-62MMHB-311/431-1?"
+
+"What is the business segment for MA000045435?"
+"Does TLE4270NKSA1 belong to the same business segment?"
+
+"What is the final test location for 99923185?"
+"Is this location different from the one used for S1321A?"
+
+"Can you provide the packaging type for PG-VQFN-20-3?"
+"Is this packaging suitable for ICE3B0565JFKLA1?"
+
+"What is the QA release date for MA000047810?"
+"Was SP000006546 released in the same time period?"
+
+"What are the ESD ratings for HVIC_IC2?"
+"How do these compare with the ESD ratings of SPN01N60C3?"
+
+"What is the assembly location for 99957254?"
+"Is P4175J assembled at the same location?"
+
+"Can you confirm the package size for T-M5.1-8-4?"
+"Is this package size also used for MA000045435?"
+
+"What is the moisture sensitivity level for A-PS3-1-1?"
+"Does ADM8211C-AA-T-1 require the same handling conditions?"
+
+"What is the wafer diameter for SP000096932?"
+"If the diameter is large, does IPP60R125C6XKSA1 use a similar wafer size?"
+
+"What is the final test location for IFX?"
+"Are products like RCB130_12 tested at the same location?"
+
+"Can you provide the package name for PMB 7850 E V3.1F M42?"
+"Is this the same package used by PEF 22624 E V1.2?"
+
+"What is the packaging type for SP000017457?"
+"Given that packaging, is MA000093995 moisture-protected or not?"
+

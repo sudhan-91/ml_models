@@ -1,0 +1,19 @@
+Can you check whether P4175J and MA000047810 are assembled at the same location?
+Do 99957254 and ICE3B0565JFKLA1 have the same final test location?
+Are the ESD ratings identical for SP000216514 and S0763M?
+Can you provide the die size for IPB50R199CPATMA1 and the package type for 99972636?
+Show the business segment for MA000045435 and the moulding compound for SP000010350.
+Please verify whether PG-VQFN-20-3 and ICE3B0565JFKLA1 belong to the same business segment.
+Check if 99963635 and SP000017457 were released in the same QA period.
+Are P5156J and RCB130_12 using the same packaging type?
+If MA000093995 is moisture-sensitive, then tell me whether SP000006546 requires dry packing as well.
+If P4175J is assembled in India, show me where 99924877 is assembled.
+Tell me the wafer diameter for SP000096932, and if it is above 300 mm, give me the die size for ICE3B0565JFKLA1.
+List the final test locations for S1321A, 99923185, and SP000010350, and tell me if any of them differ.
+Get the QA release dates for MA000047810, IPP60R125C6XKSA1, and P2944X, then sort them from oldest to newest.
+Fetch the packaging type for A-PS3-1-1 and ADM8211C-AA-T-1, and highlight if they are not the same.
+Give me the die size for AG-62MMHB-311/431-1 and the assembly location for PEF 22624 E V1.2.
+Provide the business segment for C28RR and the moisture sensitivity level for MA000093995.
+Tell me whether ICE3B0565JFKLA1 and SP000017457 are handled in the same wafer fab location.
+Explain any differences in packaging and testing locations between P4175J and 99957254.
+Identify which of MA000045435, SP000006546, and TLE4270NKSA1 has the highest moisture sensitivity level.
