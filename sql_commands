@@ -81,16 +81,11 @@ def get_chat_records(
 
     return records
 
-    
-    sql = """
-SELECT *
-FROM [session]
-WHERE user_id = :user_id
-  AND (
-        (:start IS NULL AND :end IS NULL)
-        OR (created_time >= :start AND created_time < :end)
-      )
-"""
+connection_url = (
+    f"mssql+pyodbc://{sql_config['domain']}\\{sql_config['username']}:"
+    f"{sql_config['password']}@{sql_config['host']}:{sql_config['port']}/"
+    f"{sql_config['database']}"
+    "?driver=ODBC+Driver+17+for+SQL+Server"
+)
 
-    
    
