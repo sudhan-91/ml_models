@@ -1,0 +1,87 @@
+docker run -it --name db-services --network static-tools_emphas-ai-network -p 8001:8001 emphasai2024/db-service:20 bash
+
+-----------------------------------------------------------------------------------
+from sqlalchemy import update
+from datetime import datetime
+
+with db.begin():   # context manager handles commit / rollback
+    stmt = (
+        update(Session)
+        .where(Session.chat_id == chat_id)
+        .values(
+            chat_history=chat_history,
+            title=title,@app.get("/api/chat/{chatId}")
+            bookmark_status=bookmark_status,
+            modified_time=datetime.utcnow()
+        )
+    )
+
+    result = db.execute(stmt)
+
+if result.rowcount == 0:
+    print("chat_id not found")
+    
+---------------------------------------------------------------------
+
+from datetime import datetime, timedelta, date
+
+def get_time_range(timeline: str):
+    today = date.today()
+
+    if timeline == "TODAY":
+        start = datetime.combine(today, datetime.min.time())
+        end = start + timedelta(days=1)
+
+    elif timeline == "YESTERDAY":
+        start = datetime.combine(today - timedelta(days=1), datetime.min.time())
+        end = start + timedelta(days=1)
+
+    elif timeline == "LAST_7_DAYS":
+        end = datetime.utcnow()
+        start = end - timedelta(days=7)
+
+    else:
+        return None, None
+
+    return start, end
+    
+start, end = get_time_range(timeline)
+with db.begin():
+    query = db.query(Session).filter(Session.user_id == user_id)
+
+    if start and end:
+        query = query.filter(
+            Session.created_time >= start,
+            Session.created_time < end
+        )
+
+    records = query.all()
+    
+    
+---------------------------------------------------------------------
+
+@app.get("/api/chat")
+def get_chat_records(
+    chat_id: str,
+    db: Session = Depends(get_db)
+):
+    with db.begin():   # context manager
+        records = (
+            db.query(ChatHistory)   # ← different table
+            .filter(
+                ChatHistory.chat_id == chat_id,
+                ChatHistory.deleted_time.is_(None)  # optional
+            )
+            .order_by(ChatHistory.created_time.asc())
+            .all()
+        )
+
+    if not records:
+        return []   # or raise 404 if you prefer
+
+    return records
+
+    
+    
+    
+   
