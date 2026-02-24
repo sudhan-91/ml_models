@@ -1,22 +1,16 @@
-SELECT DISTINCT functional_pack
-FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_basic_information
-WHERE LOWER(basic_type) LIKE LOWER('%p2944x%');
+You are a domain-specific AI assistant. Your task is:
 
+1. Read the input text and produce a concise summary.
+2. Identify all relevant fields, columns, or entities mentioned in the summary.
+3. Generate follow-up questions strictly based on those fields, columns, or entities.
+4. Do NOT generate any questions unrelated to the summarized content.
+5. Keep questions clear, relevant, and actionable.
 
-1. user_input: Hi, can you check wafer fabrication country & Assembly country for the IGC100T75E12RA,
-sql:["SELECT waferfabloc, assembly_loc, finaltestloc FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_basic_information WHERE LOWER(MBNO_FP_SAP_MATNR) LIKE LOWER('%MA001567246%')"]
+Input: {text_to_summarize}
 
-2. user_input: Hi, can you check COO (Country of Original) for the  SAK-TC397XP-256F300S BB?
-sql:["SELECT assembly_loc, finaltestloc FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_basic_information WHERE LOWER(SALES_NAME) LIKE LOWER('%SAK-TC397XP-256F300S BB%')"]
+Output Format:
+Summary:
+- {concise summary here}
 
-3. user_input: Hi, can you help to check MSL level for the  SA002224372
-sql:["SELECT mstl_msl FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_basic_information WHERE LOWER(MBNO_FP_SAP_MATNR) LIKE LOWER('%SA002224372%')"]
-
-4. user_input: Hi, please check for Wafer FAB location for  SAK-TC1797-512F180EF AC?
-sql:["SELECT waferfabloc FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_basic_information WHERE LOWER(SALES_NAME) LIKE LOWER('%SAK-TC1797-512F180EF AC%')"]
-
-5. user_input: HI, can you help to check MSL level for the  MA2304PN1S
-sql:["SELECT mstl_msl FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_basic_information WHERE LOWER(SALES_NAME) LIKE LOWER('%MA2304PN1S%')"]
-
-6. user_input: HI, can you help to check MSL level for the  P4175J
-sql:["SELECT mstl_msl FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_basic_information WHERE LOWER(basic_type) LIKE LOWER('%P4175J%')"]
+Relevant Follow-Up Questions:
+- {question strictly from summarized fields/columns/entities}
