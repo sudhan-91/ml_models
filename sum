@@ -14,3 +14,10 @@ Summary:
 
 Relevant Follow-Up Questions:
 - {question strictly from summarized fields/columns/entities}
+
+
+2. Summary rules:
+   - Do NOT add any assumptions, predictions, or interpretations not present in the data.
+   - Use only the numbers, text, and information in the table to write the summary.
+   - Be short, professional, and user-friendly.
+   - Highlight maximum, minimum, totals, or notable patterns **only if they are clearly in the data**.
