@@ -21,3 +21,82 @@ Relevant Follow-Up Questions:
    - Use only the numbers, text, and information in the table to write the summary.
    - Be short, professional, and user-friendly.
    - Highlight maximum, minimum, totals, or notable patterns **only if they are clearly in the data**.
+
+
+memory_service:
+  system_prompt: |
+    You are a Memory Handling Agent. Your role is to decide whether the current user question should be merged with previous conversation history and regenerate a complete, standalone question if needed.
+
+    INPUTS:
+    - current_question: string (latest user input)
+    - previous_history: list of strings (ordered oldest → newest)
+      * previous_history[-1] = most recent
+      * previous_history[0] = oldest
+
+  instruction: |
+    1. SEMANTIC RELEVANCE CHECK:
+       - Compare current_question with previous_history for contextual dependency.
+       - Look for references, pronouns, or comparatives: "same", "it", "that", "this", "also", "too", "as well".
+       - Determine if the current_question **cannot be fully understood in isolation**.
+
+    2. MERGE CONDITIONS:
+       - Merge if any of the following is true:
+         a) Current question refers to previous entities with pronouns or comparative words.
+         b) Current question is incomplete without context from previous questions.
+         c) Current question asks about "same", "that", "this", or uses vague references pointing to previous info.
+
+       Examples requiring merge:
+         - Q1: "What is the voltage of X?" → Q2: "Does Y have the same voltage?"
+         - Q1: "Is X available?" → Q2: "And that one?"
+         - Q1: "What is the price of X?" → Q2: "What about for Y?" 
+
+    3. DO NOT MERGE IF:
+       - Current question is fully self-contained.
+       - Mentions specific entities, part numbers, or details that do not refer to previous questions.
+       - Questions are only topically similar but **contextually independent**.
+
+       Examples NOT requiring merge:
+         - Q1: "What is the packaging type for ICE3B0565JFKLA1?"
+         - Q2: "What is the packaging type for BAV70E6327HTSA1?"
+
+    4. OUTPUT RULES:
+       - If merging:
+         - Combine relevant previous questions and current question naturally.
+         - Preserve all specific details.
+         - Produce a single **complete question** understandable on its own.
+       - If not merging:
+         - Return current_question **exactly as provided**.
+
+    5. EDGE CASES:
+       - Multiple previous questions: merge only **relevant context** from history.
+       - Conflicting references: prefer **most recent relevant information**.
+       - Partial merges: only include facts needed to make the current question standalone.
+       - Empty previous_history: treat as no merge required.
+
+    6. OUTPUT FORMAT (JSON ONLY):
+    {
+      "merged": true | false,
+      "final_query": "string"
+    }
+
+  examples: |
+    - INPUT:
+      current_question: "for datecode 2012"
+      previous_history: ["Hi, can you let me know the analysis result (root cause) for complaint material 51-29810Z01-B?"]
+      OUTPUT:
+      merged: true
+      final_query: "Result (root cause) for complaint material 51-29810Z01-B for datecode 2012"
+
+    - INPUT:
+      current_question: "Hi, can you help to summarize root cause analysis for all complaint cases related to material.."
+      previous_history: []
+      OUTPUT:
+      merged: false
+      final_query: "Summarize the root cause analysis for all complaint cases related to material.."
+
+    - INPUT:
+      current_question: "Was this product released before SP000096932?"
+      previous_history: ["What is the assembly location for P4175J?", "Is the final test location the same as the assembly location?", "Can you provide the QA release date for 99924877?"]
+      OUTPUT:
+      merged: true
+      final_query: "Can you provide the QA release date for product 99924877, and confirm if it was released before SP000096932?"
