@@ -1,5 +1,5 @@
-SELECT DISTINCT soldto_name, dpro_sales_name
-FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_tma_shipment
-WHERE SIMILARITY(LOWER(dpro_sales_name), LOWER('tLE9250VLE')) = 1
-  AND soldto_name IS NOT NULL
-ORDER BY soldto_name
+-- Check available functions
+SELECT * FROM GET_FUNCTIONS()
+WHERE function_name LIKE '%MATCH%'
+   OR function_name LIKE '%REGEX%'
+   OR function_name LIKE '%LIKE%'
