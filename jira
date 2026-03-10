@@ -1,5 +1,5 @@
 SELECT DISTINCT soldto_name, dpro_sales_name
 FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_tma_shipment
-WHERE REGEXP(dpro_sales_name, '(?i)^tLE9250VLE$') = TRUE
+WHERE SIMILARITY(LOWER(dpro_sales_name), LOWER('tLE9250VLE')) = 1
   AND soldto_name IS NOT NULL
 ORDER BY soldto_name
