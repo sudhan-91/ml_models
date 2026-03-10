@@ -1,8 +1,5 @@
 SELECT DISTINCT soldto_name, dpro_sales_name
 FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_tma_shipment
-WHERE dpro_sales_name = 'tLE9250VLE'
-CONTEXT (
-    'i18n' = 'us_pst',
-    'queryTimeout' = '900000'
-)
+WHERE REGEXP(dpro_sales_name, '(?i)^tLE9250VLE$') = TRUE
+  AND soldto_name IS NOT NULL
 ORDER BY soldto_name
