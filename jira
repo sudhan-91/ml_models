@@ -1,5 +1,9 @@
--- Check available functions
-SELECT * FROM GET_FUNCTIONS()
-WHERE function_name LIKE '%MATCH%'
-   OR function_name LIKE '%REGEX%'
-   OR function_name LIKE '%LIKE%'
+SELECT 
+    input_schema_name,
+    input_table_name,
+    database_name,
+    wrapper_type       -- ← This tells you the source DB type
+FROM   
+    GET_ELEMENTS()
+WHERE 
+    element_type = 'WRAPPER'
