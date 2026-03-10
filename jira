@@ -1,9 +1,14 @@
-SELECT 
-    input_schema_name,
-    input_table_name,
-    database_name,
-    wrapper_type       -- ← This tells you the source DB type
-FROM   
-    GET_ELEMENTS()
-WHERE 
-    element_type = 'WRAPPER'
+queries = [
+    "DESC bl_mdprd_mp_dset_qualytics_tma_shipment",
+    "DESCRIBE bl_mdprd_mp_dset_qualytics_tma_shipment",
+    "SELECT * FROM vdb_bl_md_product.bl_mdprd_mp_dset_qualytics_tma_shipment LIMIT 1",
+    "SELECT * FROM COLUMN_METADATA() WHERE view_name = 'bl_mdprd_mp_dset_qualytics_tma_shipment'",
+]
+
+for q in queries:
+    try:
+        cursor.execute(q)
+        print(f"✅ Works: {q}")
+        print(cursor.fetchone())
+    except Exception as e:
+        print(f"❌ Failed: {q} → {e}")
